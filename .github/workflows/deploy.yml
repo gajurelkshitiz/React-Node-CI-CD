@@ -1,0 +1,29 @@
+name: Basic Push to Server
+
+on:
+  push:
+    branches:
+      - main  # Replace with your branch if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_OPTS: "-p 41447 -o StrictHostKeyChecking=no"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Start SSH agent and add key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Push files to server with rsync
+        run: |
+          rsync -avz --delete \
+            -e "ssh $SSH_OPTS" \
+            ./ telemko@202.51.3.168:~/my-app
+
